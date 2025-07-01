@@ -62,6 +62,11 @@ const App = () => {
     }
   }
 
+  const handleError = (message) => {
+    setErrorMessage(message);
+    setTimeout(() => setErrorMessage(null), 5000); // Clear after 5s (optional)
+  };
+
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
@@ -106,7 +111,7 @@ const App = () => {
         setUser(null)
       }}>logout</button>
       <p></p>
-      <NewBlog onSuccess={loadBlogs}/>
+      <NewBlog onSuccess={loadBlogs} onError={handleError} />
       <h2>Blogs recommended by users</h2>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />

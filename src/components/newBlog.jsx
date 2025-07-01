@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import blogService from '../services/blogs'
 
-const BlogForm = ({ onSuccess }) => {
+const BlogForm = ({ onSuccess, onError}) => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -26,6 +26,8 @@ const BlogForm = ({ onSuccess }) => {
       onSuccess?.()
     } catch (error) {
       console.error('Error creating blog:', error);
+      const message = error?.response?.data?.error || 'Submission failed';
+      onError?.(message); // ✅ Call the error handler
     }
   };
 
