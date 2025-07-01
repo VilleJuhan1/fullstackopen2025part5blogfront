@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
+import NewBlog from './components/NewBlog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -12,10 +13,31 @@ const App = () => {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    loadBlogs()
   }, [])
+
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      console.log('user from localStorage', user)
+      setUser(user)
+      blogService.setToken(user.token)
+    } 
+  }, [])
+
+  const loadBlogs = async () => {
+    try {
+      const blogs = await blogService.getAll()
+      setBlogs(blogs)
+    } catch (error) {
+      console.error('Error loading blogs:', error)
+      setErrorMessage('Failed to load blogs')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -25,10 +47,10 @@ const App = () => {
         username, password,
       })
       console.log('user', userTmp)
-      //window.localStorage.setItem(
-      //  'loggedBlogappUser', JSON.stringify(user)
-      //) 
-      //blogService.setToken(userTmp.token)
+      window.localStorage.setItem(
+        'loggedBlogappUser', JSON.stringify(userTmp)
+      ) 
+      blogService.setToken(userTmp.token)
       setUser(userTmp)
       setUsername('')
       setPassword('')
@@ -44,7 +66,7 @@ const App = () => {
     <form onSubmit={handleLogin}>
       <div>
         username
-          <input
+        <input
           type="text"
           value={username}
           name="username"
@@ -53,7 +75,7 @@ const App = () => {
       </div>
       <div>
         password
-          <input
+        <input
           type="password"
           value={password}
           name="password"
@@ -76,7 +98,16 @@ const App = () => {
 
   return (
     <div>
-      <h2>blogs</h2>
+      <h1>Blog app</h1>
+      <Notification message={errorMessage} />
+      <p>{user.name} logged in</p>
+      <button onClick={() => {
+        window.localStorage.removeItem('loggedBlogappUser')
+        setUser(null)
+      }}>logout</button>
+      <p></p>
+      <NewBlog onSuccess={loadBlogs}/>
+      <h2>Blogs recommended by users</h2>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
