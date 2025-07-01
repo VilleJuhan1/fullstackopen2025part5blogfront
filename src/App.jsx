@@ -7,7 +7,7 @@ import loginService from './services/login'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [infoMessage, setInfoMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -32,13 +32,14 @@ const App = () => {
       setBlogs(blogs)
     } catch (error) {
       console.error('Error loading blogs:', error)
-      setErrorMessage('Failed to load blogs')
+      setInfoMessage('Failed to load blogs')
       setTimeout(() => {
-        setErrorMessage(null)
+        setInfoMessage(null)
       }, 5000)
     }
   }
 
+  // Handle login form submission
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -47,25 +48,37 @@ const App = () => {
         username, password,
       })
       console.log('user', userTmp)
+      // Store user in localStorage
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(userTmp)
-      ) 
+      )
+      // Remove the user from localStorage after 1 hour (3600000 ms)
+      setTimeout(() => {
+        window.localStorage.removeItem('loggedBlogappUser')
+      }, 3600000)
       blogService.setToken(userTmp.token)
       setUser(userTmp)
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setErrorMessage('wrong credentials')
+      setInfoMessage('wrong username or password')
+      console.error('Login error:', exception)
       setTimeout(() => {
-        setErrorMessage(null)
+        setInfoMessage(null)
       }, 5000)
     }
   }
 
   const handleError = (message) => {
-    setErrorMessage(message);
-    setTimeout(() => setErrorMessage(null), 5000); // Clear after 5s (optional)
-  };
+    setInfoMessage(message)
+    setTimeout(() => setInfoMessage(null), 5000) // Clear after 5s (optional)
+  }
+
+  const handleInfo = (message) => {
+    setInfoMessage(message);
+    setTimeout(() => setInfoMessage(null), 5000) // Clear after 5s
+    loadBlogs(); // Reload blogs after successful operation
+  }
 
   const loginForm = () => (
     <form onSubmit={handleLogin}>
@@ -91,27 +104,29 @@ const App = () => {
     </form>      
   )
 
+  // If user is not logged in, show login form
   if (user === null) {
     return (
       <div>
         <h1>Please log in to application</h1>
-        <Notification message={errorMessage} />
+        <Notification message={infoMessage} />
         {loginForm()}
       </div>
     )
   }
 
+  // If user is logged in, show the main application
   return (
     <div>
       <h1>Blog app</h1>
-      <Notification message={errorMessage} />
+      <Notification message={infoMessage} />
       <p>{user.name} logged in</p>
       <button onClick={() => {
         window.localStorage.removeItem('loggedBlogappUser')
         setUser(null)
       }}>logout</button>
       <p></p>
-      <NewBlog onSuccess={loadBlogs} onError={handleError} />
+      <NewBlog onSuccess={handleInfo} onError={handleError} />
       <h2>Blogs recommended by users</h2>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
