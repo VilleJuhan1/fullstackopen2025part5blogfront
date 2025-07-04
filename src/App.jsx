@@ -8,47 +8,59 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [infoMessage, setInfoMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
-  const [loginVisible, setLoginVisible] = useState(false)
+  const [blogs, setBlogs] = useState([]) // Blogien tila
+  const [infoMessage, setInfoMessage] = useState(null) // Ilmoitusviestin tila
+  const [username, setUsername] = useState('') // Käyttäjätunnuksen tila
+  const [password, setPassword] = useState('') // Salasanan tila
+  const [user, setUser] = useState(null) // Kirjautuneen käyttäjän tila
+  const [loginVisible, setLoginVisible] = useState(false) // Näytetäänkö kirjautumislomake
 
-  const blogFormRef = useRef()
+  const blogFormRef = useRef() // Viittaus uuden blogin lomakkeeseen
 
   useEffect(() => {
-    loadBlogs()
+    loadBlogs() // Ladataan blogit sovelluksen käynnistyessä
   }, [])
 
   useEffect(() => {
+    // Tarkistetaan onko käyttäjä kirjautunut localStoragessa
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      console.log('user from localStorage', user)
+      //console.log('user from localStorage', user)
       setUser(user)
       blogService.setToken(user.token)
     } 
   }, [])
 
+  // Blogien lataaminen palvelimelta
   const loadBlogs = async () => {
     try {
-      const blogs = await blogService.getAll()
-      const blogsWithExtendedViewAttribute = blogs.map(blog => ({
-        ...blog,
-        extendedView: false
-      }))
-      setBlogs(blogsWithExtendedViewAttribute)
+      const fetchedBlogs = await blogService.getAll()
+
+      setBlogs(prevBlogs => {
+        const merged = fetchedBlogs
+          .sort((a, b) => b.likes - a.likes) // Järjestetään blogit tykkäysten mukaan
+          .map(blog => {
+            const existing = prevBlogs.find(b => b.id === blog.id)
+            return {
+              ...blog,
+              extendedView: existing?.extendedView ?? false, // Säilytetään extendedView-tieto tai oletus
+            }
+          })
+
+        return merged
+      })
+
     } catch (error) {
       console.error('Error loading blogs:', error)
-      setInfoMessage('Failed to load blogs')
+      setInfoMessage('Blogien lataus epäonnistui')
       setTimeout(() => {
         setInfoMessage(null)
       }, 5000)
     }
   }
 
-  // Handle login form submission
+  // Käsitellään kirjautumislomakkeen lähetys
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -57,11 +69,11 @@ const App = () => {
         username, password,
       })
       console.log('user', userTmp)
-      // Store user in localStorage
+      // Tallennetaan käyttäjä localStorageen
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(userTmp)
       )
-      // Remove the user from localStorage after 1 hour (3600000 ms)
+      // Poistetaan käyttäjä localStoragesta tunnin kuluttua (3600000 ms)
       setTimeout(() => {
         window.localStorage.removeItem('loggedBlogappUser')
       }, 3600000)
@@ -70,7 +82,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setInfoMessage('wrong username or password')
+      setInfoMessage('väärä käyttäjätunnus tai salasana')
       console.error('Login error:', exception)
       setTimeout(() => {
         setInfoMessage(null)
@@ -78,17 +90,20 @@ const App = () => {
     }
   }
 
+  // Näytetään virheilmoitus
   const handleError = (message) => {
     setInfoMessage(message)
-    setTimeout(() => setInfoMessage(null), 5000) // Clear after 5s (optional)
+    setTimeout(() => setInfoMessage(null), 5000) // Tyhjennetään viesti 5 sekunnin kuluttua
   }
 
+  // Näytetään onnistumisilmoitus ja ladataan blogit uudelleen
   const handleInfo = (message) => {
     setInfoMessage(message);
-    setTimeout(() => setInfoMessage(null), 5000) // Clear after 5s
-    loadBlogs(); // Reload blogs after successful operation
+    setTimeout(() => setInfoMessage(null), 5000) // Tyhjennetään viesti 5 sekunnin kuluttua
+    loadBlogs(); // Ladataan blogit uudelleen onnistuneen toiminnon jälkeen
   }
 
+  // Kirjautumislomakkeen näyttäminen/piilottaminen
   const loginForm = () => {
     const hideWhenVisible = { display: loginVisible ? 'none' : '' }
     const showWhenVisible = { display: loginVisible ? '' : 'none' }
@@ -96,7 +111,7 @@ const App = () => {
     return (
       <div>
         <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>log in</button>
+          <button onClick={() => setLoginVisible(true)}>kirjaudu sisään</button>
         </div>
         <div style={showWhenVisible}>
           <LoginForm
@@ -106,12 +121,13 @@ const App = () => {
             handlePasswordChange={({ target }) => setPassword(target.value)}
             handleSubmit={handleLogin}
           />
-          <button onClick={() => setLoginVisible(false)}>cancel</button>
+          <button onClick={() => setLoginVisible(false)}>peruuta</button>
         </div>
       </div>
     )
   }
 
+  // Asetetaan blogin extendedView-tila
   const setExtendedView = (id, value) => {
     setBlogs((prevBlogs) =>
       prevBlogs.map((blog) =>
@@ -120,60 +136,21 @@ const App = () => {
     )
   }
 
-  /*
-  const loginForm = () => (
-    <form onSubmit={handleLogin}>
-      <div>
-        username
-        <input
-          type="text"
-          value={username}
-          name="username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type="password"
-          value={password}
-          name="password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type="submit">login</button>
-    </form>      
-  )
-  
-
-  // If user is not logged in, show login form
-  if (user === null) {
-    return (
-      <div>
-        <h1>Please log in to application</h1>
-        <Notification message={infoMessage} />
-        {loginForm()}
-      </div>
-    )
-  }
-    */
-
-
-  // Main application view
+  // Sovelluksen pääsisältö
   return (
     <div>
-      <h1>Blog app</h1>
-      <Notification message={infoMessage} />
+      <h1>Blogisovellus</h1>
       {!user && loginForm()}
       {user && <div>
-        <p>{user.name} logged in</p>
+        <p>{user.name} kirjautunut sisään</p>
         <button onClick={() => {
+          // Kirjaudutaan ulos
           window.localStorage.removeItem('loggedBlogappUser')
           setUser(null)
           setLoginVisible(false)
-        }}>logout</button>
+        }}>kirjaudu ulos</button>
         <p></p>
-        <Togglable buttonLabel='new blog' ref={blogFormRef}>
+        <Togglable buttonLabel='uusi blogi' ref={blogFormRef}>
           <NewBlog
             onSuccess={(message) => {
               handleInfo(message)
@@ -183,41 +160,28 @@ const App = () => {
           />
         </Togglable>
       </div>}
-      <h2>Blogs recommended by users</h2>
-      <p>Click 'View' for more details and 'Hide' for less</p>
+      <h2>Käyttäjien suosittelemat blogit</h2>
+      <p>Paina 'Näytä' saadaksesi lisätietoja ja 'Piilota' palataksesi takaisin</p>
       <ul>
         {blogs.map((blog) => (
           <Blog
+            user={user ? user : null}  // Välitetään käyttäjä, jos kirjautunut
+            onSuccess={(message) => {
+              handleInfo(message)
+            }}
             key={blog.id}
             blog={blog}
             onToggle={(value) => setExtendedView(blog.id, value)}
           />
         ))}
       </ul>
+      <Notification message={infoMessage} /> {/* Ilmoitusviesti */}
+      <footer style={{ fontSize: '0.85em', lineHeight: 1 }}>
+        <p>Blogisovellus, Full Stack Open 2025</p>
+        <p>Tekijä: Ville-Juhani Nivasalo</p>
+      </footer>
     </div>
   )
 }
-
-/*
-      <ul>
-        {blogs.map((blog) => (
-          <li key={blog.id}>
-            <strong>{blog.title}</strong> by {blog.author}
-
-            {!blog.extendedView ? (
-              <button onClick={() => setExtendedView(blog.id, true)}>View</button>
-            ) : (
-              <>
-                <div>
-                  <p>Full blog content here...</p>
-                  // { Other blog details can go here }
-                </div>
-                <button onClick={() => setExtendedView(blog.id, false)}>Hide</button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
-*/
 
 export default App
