@@ -34,7 +34,11 @@ const App = () => {
   const loadBlogs = async () => {
     try {
       const blogs = await blogService.getAll()
-      setBlogs(blogs)
+      const blogsWithExtendedViewAttribute = blogs.map(blog => ({
+        ...blog,
+        extendedView: false
+      }))
+      setBlogs(blogsWithExtendedViewAttribute)
     } catch (error) {
       console.error('Error loading blogs:', error)
       setInfoMessage('Failed to load blogs')
@@ -108,6 +112,14 @@ const App = () => {
     )
   }
 
+  const setExtendedView = (id, value) => {
+    setBlogs((prevBlogs) =>
+      prevBlogs.map((blog) =>
+        blog.id === id ? { ...blog, extendedView: value } : blog
+      )
+    )
+  }
+
   /*
   const loginForm = () => (
     <form onSubmit={handleLogin}>
@@ -160,20 +172,52 @@ const App = () => {
           setUser(null)
           setLoginVisible(false)
         }}>logout</button>
-      <p></p>
-      <Togglable buttonLabel='new blog' ref={blogFormRef}>
-        <NewBlog
-          onSuccess={handleInfo}
-          onError={handleError}
-        />
-      </Togglable>
+        <p></p>
+        <Togglable buttonLabel='new blog' ref={blogFormRef}>
+          <NewBlog
+            onSuccess={(message) => {
+              handleInfo(message)
+              blogFormRef.current && blogFormRef.current.toggleVisibility()
+            }}
+            onError={handleError}
+          />
+        </Togglable>
       </div>}
       <h2>Blogs recommended by users</h2>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+      <p>Click 'View' for more details and 'Hide' for less</p>
+      <ul>
+        {blogs.map((blog) => (
+          <Blog
+            key={blog.id}
+            blog={blog}
+            onToggle={(value) => setExtendedView(blog.id, value)}
+          />
+        ))}
+      </ul>
     </div>
   )
 }
+
+/*
+      <ul>
+        {blogs.map((blog) => (
+          <li key={blog.id}>
+            <strong>{blog.title}</strong> by {blog.author}
+
+            {!blog.extendedView ? (
+              <button onClick={() => setExtendedView(blog.id, true)}>View</button>
+            ) : (
+              <>
+                <div>
+                  <p>Full blog content here...</p>
+                  // { Other blog details can go here }
+                </div>
+                <button onClick={() => setExtendedView(blog.id, false)}>Hide</button>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+*/
 
 export default App
