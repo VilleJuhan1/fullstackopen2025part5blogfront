@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import NewBlog from './components/NewBlog'
@@ -14,6 +14,8 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [loginVisible, setLoginVisible] = useState(false)
+
+  const blogFormRef = useRef()
 
   useEffect(() => {
     loadBlogs()
@@ -144,7 +146,8 @@ const App = () => {
   }
     */
 
-  // If user is logged in, show the main application
+
+  // Main application view
   return (
     <div>
       <h1>Blog app</h1>
@@ -152,15 +155,19 @@ const App = () => {
       {!user && loginForm()}
       {user && <div>
         <p>{user.name} logged in</p>
-
-      <button onClick={() => {
-        window.localStorage.removeItem('loggedBlogappUser')
-        setUser(null)
-        setLoginVisible(false)
-      }}>logout</button>
-      </div>}
+        <button onClick={() => {
+          window.localStorage.removeItem('loggedBlogappUser')
+          setUser(null)
+          setLoginVisible(false)
+        }}>logout</button>
       <p></p>
-      <NewBlog onSuccess={handleInfo} onError={handleError} />
+      <Togglable buttonLabel='new blog' ref={blogFormRef}>
+        <NewBlog
+          onSuccess={handleInfo}
+          onError={handleError}
+        />
+      </Togglable>
+      </div>}
       <h2>Blogs recommended by users</h2>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
