@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
 import NewBlog from './components/NewBlog'
+import LoginForm from './components/LoginForm'
+import Togglable from './components/Togglable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -11,6 +13,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [loginVisible, setLoginVisible] = useState(false)
 
   useEffect(() => {
     loadBlogs()
@@ -80,6 +83,30 @@ const App = () => {
     loadBlogs(); // Reload blogs after successful operation
   }
 
+  const loginForm = () => {
+    const hideWhenVisible = { display: loginVisible ? 'none' : '' }
+    const showWhenVisible = { display: loginVisible ? '' : 'none' }
+
+    return (
+      <div>
+        <div style={hideWhenVisible}>
+          <button onClick={() => setLoginVisible(true)}>log in</button>
+        </div>
+        <div style={showWhenVisible}>
+          <LoginForm
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={handleLogin}
+          />
+          <button onClick={() => setLoginVisible(false)}>cancel</button>
+        </div>
+      </div>
+    )
+  }
+
+  /*
   const loginForm = () => (
     <form onSubmit={handleLogin}>
       <div>
@@ -103,6 +130,7 @@ const App = () => {
       <button type="submit">login</button>
     </form>      
   )
+  
 
   // If user is not logged in, show login form
   if (user === null) {
@@ -114,17 +142,23 @@ const App = () => {
       </div>
     )
   }
+    */
 
   // If user is logged in, show the main application
   return (
     <div>
       <h1>Blog app</h1>
       <Notification message={infoMessage} />
-      <p>{user.name} logged in</p>
+      {!user && loginForm()}
+      {user && <div>
+        <p>{user.name} logged in</p>
+
       <button onClick={() => {
         window.localStorage.removeItem('loggedBlogappUser')
         setUser(null)
+        setLoginVisible(false)
       }}>logout</button>
+      </div>}
       <p></p>
       <NewBlog onSuccess={handleInfo} onError={handleError} />
       <h2>Blogs recommended by users</h2>
