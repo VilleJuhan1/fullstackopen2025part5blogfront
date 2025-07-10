@@ -1,10 +1,11 @@
 import BlogService from '../services/blogs'
+import PropTypes from 'prop-types'
 
 // Blog component to display individual blog posts
 // It includes a button to toggle the extended view of the blog details
 // The extended view shows the URL, likes, and the user who added the blog
 // onToggle is a callback function to handle the toggle state
-const Blog = ({ user, blog, onToggle, onSuccess, onError }) => {
+const Blog = ({ user, blog, onToggle, onSuccess }) => {
   //console.log('Blog component rendered with blog:', blog)
   //console.log('User in Blog component:', user)
   const isUserBlogAuthor =
@@ -65,13 +66,20 @@ const Blog = ({ user, blog, onToggle, onSuccess, onError }) => {
             <button onClick={deleteBlog} style={{ color: 'red' }}>
               delete
             </button>
-            
+
           )}
           <p></p>
         </div>
       )}
     </div>
   )
+}
+
+Blog.propTypes = {
+  onSuccess: PropTypes.func.isRequired,
+  onToggle: PropTypes.func.isRequired,
+  user: PropTypes.object,
+  blog: PropTypes.object.isRequired
 }
 
 export default Blog

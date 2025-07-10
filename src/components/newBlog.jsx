@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 import blogService from '../services/blogs'
 
 // BlogForm component for creating new blog posts
 // It includes fields for title, author, and URL
 // It handles form submission and error/success notifications
-const BlogForm = ({ onSuccess, onError}) => {
+const BlogForm = ({ onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
@@ -21,20 +22,20 @@ const BlogForm = ({ onSuccess, onError}) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await blogService.create(formData);
-      console.log('Blog creation response:', response);
+      const response = await blogService.create(formData)
+      console.log('Blog creation response:', response)
       setFormData({
         title: '',
         author: '',
         url: ''
-      });
-      onSuccess?.(`A new blog called "${formData.title}" by "${formData.author}" added`); // ✅ Call the success handler
+      })
+      onSuccess?.(`A new blog called "${formData.title}" by "${formData.author}" added`) // ✅ Call the success handler
     } catch (error) {
       console.error('Error creating blog:', error)
       const message = error?.response?.data?.error || 'Submission failed'
-      onError?.(message); // ✅ Call the error handler
+      onError?.(message) // ✅ Call the error handler
     }
-  };
+  }
 
   // Render the form with controlled inputs
   // Each input field is controlled by the state
@@ -72,7 +73,12 @@ const BlogForm = ({ onSuccess, onError}) => {
       </div>
       <button type="submit" style={{ marginTop: '20px' }}>Send</button>
     </form>
-  );
-};
+  )
+}
+
+BlogForm.propTypes = {
+  onSuccess: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired
+}
 
 export default BlogForm

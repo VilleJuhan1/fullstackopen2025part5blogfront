@@ -29,7 +29,7 @@ const App = () => {
       //console.log('user from localStorage', user)
       setUser(user)
       blogService.setToken(user.token)
-    } 
+    }
   }, [])
 
   // Blogien lataaminen palvelimelta
@@ -98,9 +98,9 @@ const App = () => {
 
   // Näytetään onnistumisilmoitus ja ladataan blogit uudelleen
   const handleInfo = (message) => {
-    setInfoMessage(message);
+    setInfoMessage(message)
     setTimeout(() => setInfoMessage(null), 5000) // Tyhjennetään viesti 5 sekunnin kuluttua
-    loadBlogs(); // Ladataan blogit uudelleen onnistuneen toiminnon jälkeen
+    loadBlogs() // Ladataan blogit uudelleen onnistuneen toiminnon jälkeen
   }
 
   // Kirjautumislomakkeen näyttäminen/piilottaminen
@@ -161,7 +161,7 @@ const App = () => {
         </Togglable>
       </div>}
       <h2>Käyttäjien suosittelemat blogit</h2>
-      <p>Paina 'Näytä' saadaksesi lisätietoja ja 'Piilota' palataksesi takaisin</p>
+      <p>Paina Näytä saadaksesi lisätietoja ja Piilota palataksesi takaisin</p>
       <ul>
         {blogs.map((blog) => (
           <Blog
