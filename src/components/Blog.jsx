@@ -36,7 +36,7 @@ const Blog = ({ user, blog, onToggle, onSuccess }) => {
         onSuccess?.(`Blog "${blog.title}" by "${blog.author}" deleted`)
       } catch (error) {
         console.error('Error deleting blog:', error)
-        onError?.(`Failed to delete blog "${blog.title}"`)
+        //onError?.(`Failed to delete blog "${blog.title}"`)
       }
     }
   }

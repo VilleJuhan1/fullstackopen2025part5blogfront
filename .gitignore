@@ -1,3 +1,7 @@
+# .gitignore
+.coverage
+.coverage/
+
 # Logs
 logs
 *.log
