@@ -5,13 +5,16 @@ import PropTypes from 'prop-types'
 // It includes a button to toggle the extended view of the blog details
 // The extended view shows the URL, likes, and the user who added the blog
 // onToggle is a callback function to handle the toggle state
-const Blog = ({ user, blog, onToggle, onSuccess }) => {
+const Blog = ({ user, blog, onToggle, onSuccess, onLike }) => {
   //console.log('Blog component rendered with blog:', blog)
   //console.log('User in Blog component:', user)
   const isUserBlogAuthor =
     user && blog.user && user.username === blog.user.username ? true : false
 
   const handleLike = async () => {
+    if (onLike) {
+      onLike()
+    }
     const updatedBlog = {
       ...blog,
       likes: blog.likes + 1,

@@ -1,6 +1,6 @@
 # .gitignore
-.coverage
-.coverage/
+coverage/
+coverage
 
 # Logs
 logs
