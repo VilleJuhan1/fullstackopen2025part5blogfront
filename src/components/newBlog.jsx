@@ -42,8 +42,9 @@ const BlogForm = ({ onSuccess, onError }) => {
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: '400px' }}>
       <div>
-        <label>Title:</label><br />
+        <label htmlFor="title">Title:</label><br />
         <input
+          id="title"
           type="text"
           name="title"
           value={formData.title}
@@ -52,8 +53,9 @@ const BlogForm = ({ onSuccess, onError }) => {
         />
       </div>
       <div style={{ marginTop: '10px' }}>
-        <label>Author:</label><br />
+        <label htmlFor='author'>Author:</label><br />
         <input
+          id="author"
           type="text"
           name="author"
           value={formData.author}
@@ -62,8 +64,9 @@ const BlogForm = ({ onSuccess, onError }) => {
         />
       </div>
       <div style={{ marginTop: '10px' }}>
-        <label>URL:</label><br />
+        <label htmlFor='url'>URL:</label><br />
         <input
+          id='url'
           type="text"
           name="url"
           value={formData.url}
