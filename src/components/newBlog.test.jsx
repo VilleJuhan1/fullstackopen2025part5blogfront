@@ -10,7 +10,7 @@ vi.mock('../services/blogs', () => ({
     create: vi.fn(),
   },
 }))
-
+// 5.16 Testataan, että tapahtumankutsufunktion kutsuminen onnistuu blogin luomisen jälkeen
 test('calls onSuccess with correct message when blog is submitted', async () => {
   blogService.create.mockResolvedValue({})
 
@@ -31,7 +31,7 @@ test('calls onSuccess with correct message when blog is submitted', async () => 
   expect(onSuccess).toHaveBeenCalledTimes(1)
   expect(onError).not.toHaveBeenCalled()
 })
-
+// 5.16 Testataan, että tapahtumankutsufunktio toimii oikein, kun annetaan virheellinen syöte
 test('calls onError with correct message when blog submission fails', async () => {
   const errorMessage = 'Submission failed'
   blogService.create.mockRejectedValue({

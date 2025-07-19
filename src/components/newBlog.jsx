@@ -2,9 +2,7 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import blogService from '../services/blogs'
 
-// BlogForm component for creating new blog posts
-// It includes fields for title, author, and URL
-// It handles form submission and error/success notifications
+// 5.6 Komponentti uuden blogin luomiseen
 const BlogForm = ({ onSuccess, onError }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -12,13 +10,13 @@ const BlogForm = ({ onSuccess, onError }) => {
     url: ''
   })
 
-  // Function to handle input changes
+  // Tilamuutosten käsittely tekstikentissä käyttäen useState-hookia
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Function to handle form submission
+  // Lomakkeen lähetys backend-palvelimelle
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
@@ -29,7 +27,7 @@ const BlogForm = ({ onSuccess, onError }) => {
         author: '',
         url: ''
       })
-      onSuccess?.(`A new blog called "${formData.title}" by "${formData.author}" added`) // ✅ Call the success handler
+      onSuccess?.(`A new blog called "${formData.title}" by "${formData.author}" added`)
     } catch (error) {
       console.error('Error creating blog:', error)
       const message = error?.response?.data?.error || 'Submission failed'
@@ -37,8 +35,7 @@ const BlogForm = ({ onSuccess, onError }) => {
     }
   }
 
-  // Render the form with controlled inputs
-  // Each input field is controlled by the state
+  // Lomakkeen renderöinti
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: '400px' }}>
       <div>
@@ -74,11 +71,11 @@ const BlogForm = ({ onSuccess, onError }) => {
           required
         />
       </div>
-      <button type="submit" style={{ marginTop: '20px' }}>Send</button>
+      <button id="blog-create" type="submit" style={{ marginTop: '20px' }}>Send</button>
     </form>
   )
 }
-
+// PropType-määrittelyt antavat palautetta, jos propseja puuttuu tai ne ovat väärän tyyppisiä
 BlogForm.propTypes = {
   onSuccess: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired

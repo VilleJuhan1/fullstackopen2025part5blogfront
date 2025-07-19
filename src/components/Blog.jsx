@@ -1,16 +1,15 @@
 import BlogService from '../services/blogs'
 import PropTypes from 'prop-types'
 
-// Blog component to display individual blog posts
-// It includes a button to toggle the extended view of the blog details
-// The extended view shows the URL, likes, and the user who added the blog
-// onToggle is a callback function to handle the toggle state
+// Blogi-komponentti yksittäisen blogin näyttämiseen
 const Blog = ({ user, blog, onToggle, onSuccess, onLike }) => {
-  //console.log('Blog component rendered with blog:', blog)
-  //console.log('User in Blog component:', user)
   const isUserBlogAuthor =
     user && blog.user && user.username === blog.user.username ? true : false
 
+  // 5.8 Tykkäyspainike
+  // Tykkäyksen seurauksena päivitetään blogi käyttäen BlogServicen update-metodia
+  // Tämän jälkeen kutsutaan onSuccess callback-funktiota, joka muuttaa sovelluksen tilaa ja lataa sen uudelleen,
+  // mikä mahdollistaa tykkäysten päivittymisen UI:ssa
   const handleLike = async () => {
     if (onLike) {
       onLike()
@@ -18,19 +17,21 @@ const Blog = ({ user, blog, onToggle, onSuccess, onLike }) => {
     const updatedBlog = {
       ...blog,
       likes: blog.likes + 1,
-      user: blog.user ? blog.user.id : null // send only user id if present
+      user: blog.user ? blog.user.id : null
     }
     try {
       await BlogService.update(blog.id, updatedBlog)
       console.log('Blog likes updated successfully:', updatedBlog)
-      // Update the blog state to reflect the new likes count
-      //onToggle(!blog.extendedView) // Toggle the view after liking
       onSuccess?.(`You liked "${blog.title}" by "${blog.author}"`)
     } catch (error) {
       console.error('Error updating blog likes:', error)
     }
   }
 
+  // 5.11 Poistopainike
+  // Poistetaan blogi käyttäen BlogServicen deleteBlog-metodia
+  // Onnistunut poisto kutsuu onSuccess callback-funktiota, joka muuttaa sovelluksen tilaa,
+  // mikä lataa sovelluksen uudelleen ja poistaa blogin UI:sta
   const deleteBlog = async () => {
     if (window.confirm(`Remove blog "${blog.title}" by ${blog.author}?`)) {
       try {
@@ -39,34 +40,39 @@ const Blog = ({ user, blog, onToggle, onSuccess, onLike }) => {
         onSuccess?.(`Blog "${blog.title}" by "${blog.author}" deleted`)
       } catch (error) {
         console.error('Error deleting blog:', error)
-        //onError?.(`Failed to delete blog "${blog.title}"`)
       }
     }
   }
 
+  // Blogin renderöinti
+  // Ehdollinen renderöinti tehdään extendedView-tilan perusteella,
+  // jota hallitaan Hide/Show-painikkeella
+  // Poisto-painike näytetään vain, jos käyttäjä on itse lisännyt blogin
   return (
     <div
+      className="blog"
       style={{
-        cursor: 'pointer' // Change cursor to pointer for better UX
+        cursor: 'pointer'
       }}
-    >
-      <button onClick={() => onToggle(!blog.extendedView)}>
+    > { /* 5.7 Painike, jolla määritellään, näytetäänkö kaikki vai vain osa tiedoista */}
+      <button id="extended-button" onClick={() => onToggle(!blog.extendedView)}>
         {blog.extendedView ? 'Hide' : 'View'}
       </button>
       <span style={{ marginLeft: '0.5rem' }}>
         <strong>{blog.title}</strong> by {blog.author}
       </span>
-
+      {/* Näytetään lisätiedot, jos extendedView on true */}
       {blog.extendedView && (
         <div style={{ marginTop: '0.5rem', marginLeft: '1rem' }}>
           <p>Url: {blog.url}</p>
           <p>
             Likes: {blog.likes}{' '}
-            <button onClick={handleLike}>like</button>
+            <button className="like-button" id="like-button" onClick={handleLike}>like</button>
           </p>
           <p>Added by: {blog.user ? blog.user.name : 'Unknown'}</p>
+          {/* 5.11 Poistopainike */}
           {isUserBlogAuthor && (
-            <button onClick={deleteBlog} style={{ color: 'red' }}>
+            <button id="delete-button" onClick={deleteBlog} style={{ color: 'red' }}>
               delete
             </button>
 
@@ -78,6 +84,7 @@ const Blog = ({ user, blog, onToggle, onSuccess, onLike }) => {
   )
 }
 
+// PropType-määrittelyt antavat palautetta, jos propseja puuttuu tai ne ovat väärän tyyppisiä
 Blog.propTypes = {
   onSuccess: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,

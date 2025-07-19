@@ -37,9 +37,10 @@ const App = () => {
     try {
       const fetchedBlogs = await blogService.getAll()
 
+      // 5.10 Blogien lajittelu tykkäysten mukaan
       setBlogs(prevBlogs => {
         const merged = fetchedBlogs
-          .sort((a, b) => b.likes - a.likes) // Järjestetään blogit tykkäysten mukaan
+          .sort((a, b) => b.likes - a.likes)
           .map(blog => {
             const existing = prevBlogs.find(b => b.id === blog.id)
             return {
@@ -61,6 +62,7 @@ const App = () => {
   }
 
   // Käsitellään kirjautumislomakkeen lähetys
+  // 5.1 Käyttäjän kirjautuminen
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -96,6 +98,7 @@ const App = () => {
     setTimeout(() => setInfoMessage(null), 5000) // Tyhjennetään viesti 5 sekunnin kuluttua
   }
 
+  // 5.9 Tykkäys renderöi onnistuneesti myös blogin lisänneen käyttäjän nimen
   // Näytetään onnistumisilmoitus ja ladataan blogit uudelleen
   const handleInfo = (message) => {
     setInfoMessage(message)
@@ -103,7 +106,7 @@ const App = () => {
     loadBlogs() // Ladataan blogit uudelleen onnistuneen toiminnon jälkeen
   }
 
-  // Kirjautumislomakkeen näyttäminen/piilottaminen
+  // 5.1 Kirjautumislomakkeen näyttäminen/piilottaminen ehdollisesti
   const loginForm = () => {
     const hideWhenVisible = { display: loginVisible ? 'none' : '' }
     const showWhenVisible = { display: loginVisible ? '' : 'none' }
@@ -111,7 +114,7 @@ const App = () => {
     return (
       <div>
         <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>kirjaudu sisään</button>
+          <button id="login" onClick={() => setLoginVisible(true)}>kirjaudu sisään</button>
         </div>
         <div style={showWhenVisible}>
           <LoginForm
@@ -137,19 +140,20 @@ const App = () => {
   }
 
   // Sovelluksen pääsisältö
+  // 5.3 Kirjautunut käyttäjä näkee lomakkeen uuden blogin luomiseen
   return (
     <div>
       <h1>Blogisovellus</h1>
       {!user && loginForm()}
       {user && <div>
         <p>{user.name} kirjautunut sisään</p>
-        <button onClick={() => {
-          // Kirjaudutaan ulos
+        <button id="logout-button" onClick={() => { // 5.2 Uloskirjautumista
           window.localStorage.removeItem('loggedBlogappUser')
           setUser(null)
           setLoginVisible(false)
         }}>kirjaudu ulos</button>
         <p></p>
+        { /* 5.5 Lomake uuden blogin luomiseen aukeaa napista, joka käyttää Togglable-komponenttia */}
         <Togglable buttonLabel='uusi blogi' ref={blogFormRef}>
           <NewBlog
             onSuccess={(message) => {
@@ -175,7 +179,7 @@ const App = () => {
           />
         ))}
       </ul>
-      <Notification message={infoMessage} /> {/* Ilmoitusviesti */}
+      <Notification message={infoMessage} /> {/* 5.4 Näytetään ilmoitukset käyttäjälle esteettisistä syistä sovelluksen alalaidassa */}
       <footer style={{ fontSize: '0.85em', lineHeight: 1 }}>
         <p>Blogisovellus, Full Stack Open 2025</p>
         <p>Tekijä: Ville-Juhani Nivasalo</p>

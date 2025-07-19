@@ -1,5 +1,7 @@
 import { useState, useImperativeHandle, forwardRef } from 'react'
 
+// Togglable-komponentti, jota voidaan käyttää uudelleen näyttämään tai piilottamaan sisältöä
+// 5.5 Lomake uuden blogin luomiseen aukeaa napista, joka käyttää Togglable-komponenttia
 const Togglable = forwardRef((props, ref) => {
   const [visible, setVisible] = useState(false)
 
